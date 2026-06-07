@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultados — Escuela de Evangelismo</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --dark: #1a1409;
+    --dark2: #2a200a;
+    --cream: #fdf8ee;
+    --cream2: #f5edd8;
+    --text: #2c1f06;
+    --muted: #7a6540;
+    --red: #c0392b;
+    --orange: #e67e22;
+    --green: #27ae60;
+    --blue: #2980b9;
+    --border: #e0d0a8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    background: var(--dark);
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .site-header h1 {
+    font-family: Arial, sans-serif;
+    color: var(--gold);
+    font-size: clamp(18px, 5vw, 28px);
+    letter-spacing: 1px;
+  }
+  .site-header p {
+    color: #a08040;
+    font-size: 13px;
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  /* ── SELECTOR BAR ── */
+  .selector-bar {
+    background: var(--dark2);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-bottom: 2px solid var(--gold);
+  }
+  .selector-bar label {
+    color: var(--gold-light);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .selector-bar select {
+    background: var(--dark);
+    color: var(--cream);
+    border: 1px solid var(--gold);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    flex: 1;
+    min-width: 180px;
+    max-width: 300px;
+  }
+  .btn-pdf {
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .btn-pdf:hover { background: var(--gold-light); }
+
+  /* ── RESUMEN ── */
+  .resumen-strip {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--cream2);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat-pill {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .stat-pill span { color: var(--muted); font-weight: 400; }
+
+  /* ── CARDS ── */
+  .cards-container {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .student-card {
+    background: white;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    animation: fadeUp 0.3s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-name {
+    font-family: Arial, sans-serif;
+    font-size: 17px;
+    color: var(--dark);
+    font-weight: 700;
+  }
+  .card-historia {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--cream2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+  .card-score-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .score-num {
+    font-family: Arial, sans-serif;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--gold);
+  }
+  .calificacion-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .cal-excelente { background: #d5f5e3; color: #1a7a40; }
+  .cal-bueno     { background: #d6eaf8; color: #1a5276; }
+  .cal-regular   { background: #fef9e7; color: #7d6608; border: 1px solid #f0c030; }
+  .cal-malo      { background: #fadbd8; color: #922b21; }
+  .cal-incompleto{ background: #eee; color: #666; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  @media(min-width: 600px) {
+    .card-grid { grid-template-columns: 1fr 1fr 1fr; }
+  }
+
+  .card-item {
+    padding: 10px 14px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .card-item:last-child, .card-item:nth-child(even) { border-right: none; }
+  @media(min-width: 600px) {
+    .card-item:nth-child(even) { border-right: 1px solid var(--border); }
+    .card-item:nth-child(3n) { border-right: none; }
+  }
+
+  .item-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+  .item-stars { font-size: 15px; letter-spacing: 1px; }
+  .star-filled { color: var(--gold); }
+  .star-empty  { color: #ddd; }
+  .item-text   { font-size: 13px; color: var(--text); }
+  .auto-check  { color: var(--green); font-weight: 600; font-size: 13px; }
+  .auto-x      { color: var(--red); font-weight: 600; font-size: 13px; }
+  .sin-resp    { color: #bbb; font-size: 12px; font-style: italic; }
+
+  .card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--cream);
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .footer-section { flex: 1; min-width: 120px; }
+  .footer-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .footer-value { font-size: 13px; color: var(--text); }
+  .footer-comentario { font-style: italic; color: #555; }
+
+  /* ── EMPTY ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; }
+
+  /* ── PDF PAGE ── */
+  @media print {
+    .selector-bar, .site-header, .resumen-strip, .btn-pdf { display: none !important; }
+    .student-card { break-inside: avoid; }
+  }
+
+  /* ── PDF COVER (oculta en pantalla) ── */
+  .pdf-cover { display: none; }
+</style>
+</head>
+<body>
+
+<div class="site-header">
+  <h1>✦ Escuela de Evangelismo</h1>
+  <p>Evaluación de Presentaciones Evangelísticas</p>
+</div>
+
+<div class="selector-bar">
+  <label>Instructor:</label>
+  <select id="selectInstructor" onchange="renderCards()">
+    <option value="">— Seleccionar —</option>
+    <option value="__GENERAL__">📊 GENERAL</option>
+    <option value="Kathryn Kuhlman">Kathryn Kuhlman</option>
+    <option value="Billy Graham">Billy Graham</option>
+    <option value="Reinhard Bonnke">Reinhard Bonnke</option>
+    <option value="María Woodworth-Etter">María Woodworth-Etter</option>
+    <option value="Aimee Semple McPherson">Aimee Semple McPherson</option>
+    <option value="Carlos Anacondia">Carlos Anacondia</option>
+  </select>
+  <button class="btn-pdf" onclick="descargarPDF()">⬇ PDF</button>
+</div>
+
+<div class="resumen-strip" id="resumenStrip" style="display:none">
+  <div class="stat-pill">👥 <span>Estudiantes:</span> <strong id="statTotal">0</strong></div>
+  <div class="stat-pill">📊 <span>Promedio:</span> <strong id="statProm">0</strong></div>
+  <div class="stat-pill">🏆 <span>Mejor:</span> <strong id="statMejor">—</strong></div>
+  <div class="stat-pill">⚠️ <span>Incompletos:</span> <strong id="statInc">0</strong></div>
+</div>
+
+<div class="cards-container" id="cardsContainer">
+  <div class="empty-state">
+    <div class="icon">🕊️</div>
+    <p>Seleccioná un instructor para ver las evaluaciones</p>
+  </div>
+</div>
+
+<script>
+// ── DATOS ─────────────────────────────────────────────────────────────────
+// Columnas: nombre, historia, q1,q2,q3, q4_historia(auto), q5,q6,q7, q8_terminos(texto), q9, q10_tiempo(bool), q11, puntaje, calificacion, terminos_usados, comentario
+// Para las preguntas de estrellas: número 1-5, null = sin responder
+// q4_historia: "valida"|"invalida"|null, q10_tiempo: true|false|null
+
+const DATA = {
+  "Kathryn Kuhlman": [
+    {n:"Juan Sagardia",   h:"El niño y la jaula",    q1:3,q2:4,q3:5,q4:"valida",q5:1,q6:3,q7:1,q8:"Ninguno",q9:null,q10:true, q11:4,p:7.27,cal:"Regular", term:"No",  com:"Buena actitud"},
+    {n:"Gabriela Ruiz",   h:"El niño y la jaula",    q1:2,q2:3,q3:2,q4:"valida",q5:1,q6:1,q7:1,q8:"Ninguno",q9:null,q10:true, q11:2,p:5.09,cal:"Malo",    term:"No",  com:"Sí"},
+    {n:"Arratia Teresa",  h:"El niño y la jaula",    q1:3,q2:3,q3:3,q4:"valida",q5:4,q6:3,q7:3,q8:"Ninguno",q9:3,  q10:true, q11:3,p:7.45,cal:"Bueno",   term:"No",  com:""},
+    {n:"Daniel Rodríguez",h:"El niño y la jaula",    q1:1,q2:2,q3:1,q4:"valida",q5:3,q6:2,q7:2,q8:"Ninguno",q9:1,  q10:true, q11:2,p:5.27,cal:"Malo",    term:"Ninguno",com:"Se lo vio nervioso, muy pausado y trabado. Estudiada pero como un relato."},
+    {n:"Myriam Rastelli",  h:"El niño y la jaula",   q1:1,q2:2,q3:1,q4:"valida",q5:3,q6:2,q7:2,q8:"Ninguno",q9:1,  q10:true, q11:2,p:5.27,cal:"Malo",    term:"Ninguno",com:"Brazos cruzados. Poco contacto visual con la gente, mirando al piso. No habló que resucito."},
+    {n:"Hilda Choque",     h:"El niño y su barquito",q1:2,q2:2,q3:2,q4:"valida",q5:3,q6:2,q7:2,q8:"Ehh",   q9:1,  q10:true, q11:2,p:5.82,cal:"Malo",    term:"Ehh", com:"Mirar al piso, da vueltas y se pone de espaldas, mucho movimiento se manos. No tiene continuidad en la expresión de la historia. Nombrar arrepentimiento."},
+    {n:"Erika Pérez",      h:"El niño y su barquito",q1:2,q2:1,q3:2,q4:"valida",q5:1,q6:1,q7:1,q8:"Ninguno",q9:1, q10:true, q11:2,p:5.45,cal:"Malo",    term:"Ninguno",com:"Muy suelta"},
+    {n:"Norma Peve",       h:"El niño y la jaula",   q1:1,q2:1,q3:1,q4:"valida",q5:1,q6:1,q7:1,q8:"Ninguno",q9:1, q10:true, q11:1,p:4.18,cal:"Malo",    term:"Ninguno",com:"Fue segura con texto en la mano como muletilla. Interesantes los diferentes tonos de voz. Se animó a hacerlo."},
+  ],
+  "Billy Graham": [
+    {n:"Alexander Aldo Tolaba",h:"El niño y la jaula",    q1:3,q2:4,q3:4,q4:"valida",q5:5,q6:4,q7:4,q8:"No",  q9:4,q10:true,q11:4,p:8.55,cal:"Bueno",    term:"No",  com:"Muy bueno"},
+    {n:"Erica Urdinnea",       h:"El niño y la jaula",    q1:4,q2:5,q3:5,q4:"valida",q5:5,q6:5,q7:5,q8:"No",  q9:5,q10:true,q11:5,p:10,  cal:"Excelente", term:"No",  com:"Muy bien"},
+    {n:"Guido Hernan Villagra",h:"El niño y la jaula",    q1:3,q2:4,q3:4,q4:"valida",q5:5,q6:4,q7:4,q8:"No",  q9:4,q10:true,q11:4,p:8.91,cal:"Bueno",    term:"No",  com:"Muy bueno"},
+    {n:"Valeria Fernandez",    h:"El niño y la jaula",    q1:3,q2:4,q3:4,q4:"valida",q5:4,q6:4,q7:4,q8:"No",  q9:4,q10:true,q11:4,p:8.55,cal:"Bueno",    term:"No",  com:"Muy bueno"},
+    {n:"Priscila Villar Ruiz", h:"El niño y la jaula",    q1:4,q2:5,q3:5,q4:"valida",q5:5,q6:5,q7:5,q8:"No",  q9:5,q10:true,q11:5,p:10,  cal:"Excelente", term:"No",  com:"Muy bueno"},
+    {n:"Gabriel Vera",         h:"El niño y la jaula",    q1:4,q2:4,q3:4,q4:"valida",q5:4,q6:3,q7:3,q8:"No",  q9:4,q10:true,q11:4,p:8,   cal:"Bueno",    term:"No",  com:""},
+    {n:"Camila Villagra",      h:"El niño y la jaula",    q1:4,q2:4,q3:1,q4:"valida",q5:4,q6:4,q7:4,q8:"No",  q9:5,q10:true,q11:5,p:9.27,cal:"Excelente", term:"No",  com:"Muy bueno"},
+    {n:"Lady Vásquez",         h:"El niño y la jaula",    q1:2,q2:2,q3:3,q4:"valida",q5:3,q6:3,q7:3,q8:"No",  q9:3,q10:true,q11:3,p:6.55,cal:"Regular",  term:"No",  com:""},
+    {n:"Aydee Vega",           h:"El niño y su barquito", q1:4,q2:5,q3:5,q4:"valida",q5:5,q6:5,q7:5,q8:"No",  q9:5,q10:true,q11:5,p:9.82,cal:"Excelente", term:"No",  com:"Me hizo emocionar, fue la mejor historia del barquito que escuché en mi vida"},
+  ],
+  "Reinhard Bonnke": [],
+  "María Woodworth-Etter": [
+    {n:"Agostina Falco",      h:"El niño y la jaula",q1:3,q2:3,q3:3,q4:"valida",q5:3,q6:3,q7:3,q8:"No agrego palabras eclesiásticas",q9:4,q10:true,q11:3,p:7.09,cal:"Regular", term:"No agrego",com:"Gran carisma"},
+    {n:"Natalia Domell",      h:"El niño y la jaula",q1:3,q2:3,q3:3,q4:"valida",q5:3,q6:3,q7:3,q8:"No induyo términos eclesiásticos",q9:3,q10:true,q11:3,p:6,   cal:"Regular", term:"No",      com:"Nerviosismo, pero deseo activo de mejorar."},
+    {n:"Mira Alicia Franco",  h:"El niño y la jaula",q1:1,q2:2,q3:1,q4:"valida",q5:2,q6:2,q7:2,q8:"No uso palabras eclesiásticas",  q9:1,q10:true,q11:2,p:5.45,cal:"Malo",    term:"No",      com:"Aplica vos dulce al momento de contarlo, lo realiza con amor."},
+    {n:"Geraldine Cordova",   h:"El niño y la jaula",q1:3,q2:3,q3:3,q4:"valida",q5:2,q6:2,q7:2,q8:"No",                             q9:2,q10:true,q11:3,p:6,   cal:"Regular", term:"No",      com:"Muy buena actuación. Vivió el cuento."},
+    {n:"Isabel Hilda Chuquima",h:"El niño y la jaula",q1:1,q2:1,q3:1,q4:"valida",q5:1,q6:1,q7:1,q8:"no",                           q9:1,q10:true,q11:1,p:4.18,cal:"Malo",    term:"no",      com:"Buena actitud"},
+    {n:"Angélica Díaz",       h:"El niño y la jaula",q1:1,q2:2,q3:1,q4:"valida",q5:2,q6:1,q7:2,q8:"no",                            q9:2,q10:true,q11:1,p:4.36,cal:"Malo",    term:"no",      com:""},
+    {n:"Héctor Rodolfo Gerez",h:"El niño y la jaula",q1:2,q2:2,q3:1,q4:"valida",q5:3,q6:2,q7:2,q8:"no aplicó",                    q9:1,q10:true,q11:2,p:5.45,cal:"Malo",    term:"no",      com:"Persistencia y Valor."},
+  ],
+  "Aimee Semple McPherson": [
+    {n:"Gloria Gonzalez",     h:"El niño y su barquito",q1:3,q2:4,q3:4,q4:"valida",q5:5,q6:3,q7:4,q8:"No",q9:4,q10:true,q11:3,p:8.18,cal:"Bueno",   term:"No",com:"Lo hizo muy bien"},
+    {n:"Viviana González",    h:"El niño y la jaula",   q1:3,q2:3,q3:3,q4:"valida",q5:5,q6:3,q7:3,q8:"No",q9:3,q10:true,q11:3,p:8,   cal:"Regular",  term:"No",com:"Bueno"},
+    {n:"Marisabel Laime",     h:"El niño y su barquito",q1:2,q2:3,q3:3,q4:"valida",q5:5,q6:3,q7:3,q8:"No",q9:3,q10:true,q11:3,p:8.36,cal:"Regular",  term:"No",com:"Bueno"},
+    {n:"Beatriz Gutierrez",   h:"El niño y la jaula",   q1:2,q2:3,q3:3,q4:"valida",q5:4,q6:3,q7:3,q8:"No",q9:3,q10:true,q11:3,p:8,   cal:"Regular",  term:"No",com:"Bueno"},
+    {n:"Condori Isabel",      h:"El niño y la jaula",   q1:3,q2:2,q3:3,q4:"valida",q5:4,q6:3,q7:3,q8:"No",q9:3,q10:true,q11:3,p:6.73,cal:"Regular",  term:"No",com:""},
+    {n:"Adriana Nancy Lapponi",h:"El niño y la jaula",  q1:2,q2:3,q3:2,q4:"valida",q5:4,q6:3,q7:4,q8:"No",q9:4,q10:true,q11:3,p:6.91,cal:"Regular",  term:"No",com:"Bueno"},
+  ],
+  "Carlos Anacondia": [
+    {n:"Dafne Albañil",      h:"El niño y la jaula",    q1:3,q2:2,q3:2,q4:"valida",q5:1,q6:1,q7:1,q8:"No terminó la historia",q9:1,q10:false,q11:1,p:4.55,cal:"Malo",    term:"No",com:"No pudo terminar"},
+    {n:"Gisell Andrusisen",  h:"El niño y la jaula",    q1:3,q2:3,q3:2,q4:"valida",q5:2,q6:2,q7:2,q8:"NO",                   q9:2,q10:false,q11:3,p:5.82,cal:"Malo",    term:"No",com:"FALTA MAS TEATRALIZAR"},
+    {n:"José María Aller",   h:"El niño y la jaula",    q1:4,q2:5,q3:2,q4:"valida",q5:4,q6:3,q7:3,q8:"No",                   q9:3,q10:false,q11:3,p:6.73,cal:"Regular", term:"No",com:"Le falta expresarse más"},
+    {n:"Carlos Ardiles",     h:"El niño y su barquito", q1:3,q2:4,q3:3,q4:"valida",q5:3,q6:3,q7:3,q8:"No",  q9:3,q10:false,q11:3,p:6.36,cal:"Regular",  term:"No",  com:""},
+    {n:"Juan Bazalar",       h:"El niño y su barquito", q1:5,q2:5,q3:3,q4:"valida",q5:4,q6:3,q7:2,q8:"No",  q9:3,q10:false,q11:3,p:6.91,cal:"Regular",  term:"No",  com:""},
+    {n:"Luisa Báez",         h:"El niño y la jaula",    q1:5,q2:5,q3:3,q4:"valida",q5:3,q6:3,q7:3,q8:"No",  q9:3,q10:false,q11:3,p:6.91,cal:"Regular",  term:"No",  com:""},
+    {n:"Franco Antezana",    h:"El niño y su barquito", q1:3,q2:4,q3:3,q4:"valida",q5:3,q6:3,q7:4,q8:"No",  q9:5,q10:true, q11:3,p:7.82,cal:"Bueno",    term:"No",  com:""},
+    {n:"Ponce Mónica",       h:"El niño y su barquito", q1:5,q2:4,q3:3,q4:"valida",q5:3,q6:4,q7:4,q8:"No",  q9:3,q10:false,q11:3,p:7.09,cal:"Regular",  term:"No",  com:""},
+    {n:"Adela Alanoca Alcon",h:"El niño y la jaula",    q1:3,q2:3,q3:2,q4:"valida",q5:3,q6:3,q7:2,q8:"No",  q9:3,q10:false,q11:2,p:5.64,cal:"Malo",     term:"No",  com:""},
+    {n:"Gisell Andrusisen",  h:"El niño y la jaula",    q1:5,q2:5,q3:5,q4:"valida",q5:3,q6:2,q7:2,q8:"No",  q9:3,q10:true, q11:4,p:8,   cal:"Bueno",    term:"No",  com:"Era tímida y se fue soltando"},
+    {n:"José María Aller",   h:"El niño y la jaula",    q1:2,q2:3,q3:2,q4:"valida",q5:3,q6:2,q7:1,q8:"No",  q9:2,q10:true, q11:3,p:6,   cal:"Regular",  term:"No",  com:"Le costó los versículos"},
+  ],
+};
+
+const LABELS = {
+  q1:"Presentación / Empatía", q2:"Claridad de la historia", q3:"Teatralización",
+  q4:"Historia contada", q5:"Versículo bíblico", q6:"Impacto / Corazón",
+  q7:"Kerigma", q8:"Términos eclesiásticos", q9:"Oración de Fe",
+  q10:"Tiempo cumplido", q11:"Expresión y gramática"
+};
+
+function stars(n, max=5) {
+  if (n === null || n === undefined) return '<span class="sin-resp">Sin responder</span>';
+  let s = '';
+  for (let i=1;i<=max;i++) {
+    s += i<=n ? '<span class="star-filled">★</span>' : '<span class="star-empty">★</span>';
+  }
+  return s;
+}
+
+function calClass(c) {
+  const m = {Excelente:'cal-excelente',Bueno:'cal-bueno',Regular:'cal-regular',Malo:'cal-malo',Incompleto:'cal-incompleto'};
+  return m[c]||'cal-incompleto';
+}
+
+function renderCards() {
+  const inst = document.getElementById('selectInstructor').value;
+  const container = document.getElementById('cardsContainer');
+  const strip = document.getElementById('resumenStrip');
+
+  if (inst === '__GENERAL__') { renderGeneral(); return; }
+
+  if (!inst) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">🕊️</div><p>Seleccioná un instructor para ver las evaluaciones</p></div>`;
+    strip.style.display = 'none';
+    return;
+  }
+
+  const lista = DATA[inst] || [];
+  if (lista.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Sin evaluaciones registradas para este instructor</p></div>`;
+    strip.style.display = 'none';
+    return;
+  }
+
+  // resumen
+  const completos = lista.filter(e=>e.p!==null);
+  const promedio = completos.length ? (completos.reduce((a,e)=>a+e.p,0)/completos.length).toFixed(2) : '—';
+  const mejor = completos.length ? completos.reduce((a,e)=>e.p>a.p?e:a) : null;
+  const incompletos = lista.filter(e=>e.p===null).length;
+
+  document.getElementById('statTotal').textContent = lista.length;
+  document.getElementById('statProm').textContent = promedio;
+  document.getElementById('statMejor').textContent = mejor ? `${mejor.n} (${mejor.p})` : '—';
+  document.getElementById('statInc').textContent = incompletos;
+  strip.style.display = 'flex';
+
+  let html = '';
+  lista.forEach((e, idx) => {
+    const delay = idx * 0.05;
+    html += `
+    <div class="student-card" style="animation-delay:${delay}s">
+      <div class="card-header">
+        <div>
+          <div class="card-name">${e.n}</div>
+          <div class="card-historia" style="margin-top:4px">📖 ${e.h}</div>
+        </div>
+        <div class="card-score-badge">
+          <div class="score-num">${e.p !== null ? e.p : '—'}</div>
+          <div class="calificacion-badge ${calClass(e.cal)}">${e.cal}</div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <div class="card-item"><div class="item-label">${LABELS.q1}</div><div class="item-stars">${stars(e.q1)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q2}</div><div class="item-stars">${stars(e.q2)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q3}</div><div class="item-stars">${stars(e.q3)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q5}</div><div class="item-stars">${stars(e.q5)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q6}</div><div class="item-stars">${stars(e.q6)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q7}</div><div class="item-stars">${stars(e.q7)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q9}</div><div class="item-stars">${stars(e.q9)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q11}</div><div class="item-stars">${stars(e.q11)}</div></div>
+        <div class="card-item"><div class="item-label">${LABELS.q10}</div><div class="item-text">${
+          e.q10 === true ? '<span class="auto-check">✔ Cumplió el tiempo</span>' :
+          e.q10 === false ? '<span class="auto-x">✘ No cumplió</span>' :
+          '<span class="sin-resp">Sin responder</span>'
+        }</div></div>
+      </div>
+      <div class="card-footer">
+        <div class="footer-section">
+          <div class="footer-label">Términos eclesiásticos</div>
+          <div class="footer-value">${e.q8 || '—'}</div>
+        </div>
+        ${e.com ? `<div class="footer-section">
+          <div class="footer-label">Comentario</div>
+          <div class="footer-value footer-comentario">${e.com}</div>
+        </div>` : ''}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function renderGeneral() {
+  const container = document.getElementById('cardsContainer');
+  const strip = document.getElementById('resumenStrip');
+
+  // Armar lista total con instructor
+  const todos = [];
+  Object.entries(DATA).forEach(([inst, lista]) => {
+    lista.forEach(e => { if (e.p !== null) todos.push({...e, inst}); });
+  });
+  const incompletos = Object.values(DATA).flat().filter(e => e.p === null).length;
+  const totalAlumnos = Object.values(DATA).flat().length;
+  const promGlobal = todos.length ? (todos.reduce((a,e)=>a+e.p,0)/todos.length).toFixed(2) : '—';
+  const mejor = todos.length ? todos.reduce((a,e)=>e.p>a.p?e:a) : null;
+
+  // Stats por instructor
+  const statsInst = {};
+  Object.entries(DATA).forEach(([inst, lista]) => {
+    const comp = lista.filter(e=>e.p!==null);
+    statsInst[inst] = {
+      total: lista.length,
+      completos: comp.length,
+      prom: comp.length ? (comp.reduce((a,e)=>a+e.p,0)/comp.length).toFixed(2) : '—',
+      excelentes: comp.filter(e=>e.cal==='Excelente').length,
+      buenos: comp.filter(e=>e.cal==='Bueno').length,
+      regulares: comp.filter(e=>e.cal==='Regular').length,
+      malos: comp.filter(e=>e.cal==='Malo').length,
+    };
+  });
+
+  // Top 5
+  const top10 = [...todos].sort((a,b)=>b.p-a.p).slice(0,10);
+
+  // Distribución de calificaciones global
+  const distrib = {Excelente:0, Bueno:0, Regular:0, Malo:0};
+  todos.forEach(e=>{ if(distrib[e.cal]!==undefined) distrib[e.cal]++; });
+  const distribTotal = todos.length || 1;
+
+  document.getElementById('statTotal').textContent = totalAlumnos;
+  document.getElementById('statProm').textContent = promGlobal;
+  document.getElementById('statMejor').textContent = mejor ? `${mejor.n} (${mejor.p})` : '—';
+  document.getElementById('statInc').textContent = incompletos;
+  strip.style.display = 'flex';
+
+  const calC = {Excelente:'#1a7a40',Bueno:'#1a5276',Regular:'#7d6608',Malo:'#922b21'};
+  const calB = {Excelente:'#d5f5e3',Bueno:'#d6eaf8',Regular:'#fef9e7',Malo:'#fadbd8'};
+
+  let html = `
+  <!-- TÍTULO GENERAL -->
+  <div style="text-align:center;padding:18px 0 6px;">
+    <div style="font-size:20px;font-weight:900;color:#1a1409;font-family:Arial;">📊 Vista General</div>
+    <div style="font-size:13px;color:#7a6540;margin-top:2px;">${totalAlumnos} estudiantes · ${Object.keys(DATA).length} grupos</div>
+  </div>
+
+  <!-- DISTRIBUCIÓN DE CALIFICACIONES -->
+  <div style="background:white;border-radius:14px;border:1px solid #e0d0a8;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+    <div style="font-size:13px;font-weight:700;color:#7a6540;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Distribución de calificaciones</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      ${Object.entries(distrib).map(([cal,n])=>`
+        <div style="flex:1;min-width:80px;background:${calB[cal]};border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:24px;font-weight:900;color:${calC[cal]};">${n}</div>
+          <div style="font-size:11px;font-weight:700;color:${calC[cal]};margin-top:2px;">${cal}</div>
+          <div style="font-size:11px;color:#999;margin-top:1px;">${Math.round(n/distribTotal*100)}%</div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- RESUMEN POR INSTRUCTOR -->
+  <div style="background:white;border-radius:14px;border:1px solid #e0d0a8;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+    <div style="font-size:13px;font-weight:700;color:#7a6540;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Promedio por grupo</div>
+    ${Object.entries(statsInst).map(([inst, s])=>{
+      const pct = s.prom !== '—' ? Math.round((parseFloat(s.prom)/10)*100) : 0;
+      return `
+      <div style="margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <div style="font-size:14px;font-weight:700;color:#1a1409;">${inst}</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:#7a6540;">${s.completos}/${s.total} evaluados</span>
+            <span style="font-size:18px;font-weight:900;color:#c9a84c;">${s.prom}</span>
+          </div>
+        </div>
+        <div style="background:#f0e8d0;border-radius:20px;height:10px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#c9a84c,#f0d080);border-radius:20px;transition:width 0.5s;"></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          ${s.excelentes ? `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#d5f5e3;color:#1a7a40;">✦ ${s.excelentes} Excelente</span>` : ''}
+          ${s.buenos ? `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#d6eaf8;color:#1a5276;">● ${s.buenos} Bueno</span>` : ''}
+          ${s.regulares ? `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#fef9e7;color:#7d6608;">● ${s.regulares} Regular</span>` : ''}
+          ${s.malos ? `<span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#fadbd8;color:#922b21;">● ${s.malos} Malo</span>` : ''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>
+
+  <!-- TOP 5 -->
+  <div style="background:white;border-radius:14px;border:1px solid #e0d0a8;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">
+    <div style="font-size:13px;font-weight:700;color:#7a6540;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">🏆 Top 10 mejores notas</div>
+    ${top10.map((e,i)=>`
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;${i<top10.length-1?'border-bottom:1px solid #f0e8d0;':''}">
+        <div style="width:28px;height:28px;border-radius:50%;background:${i===0?'#c9a84c':i===1?'#aaa':i===2?'#b87333':'#eee'};color:${i<3?'white':'#666'};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0;">${i+1}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:700;color:#1a1409;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.n}</div>
+          <div style="font-size:11px;color:#7a6540;">${e.inst}</div>
+        </div>
+        <div style="font-size:22px;font-weight:900;color:#c9a84c;flex-shrink:0;">${e.p}</div>
+        <div style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:${calB[e.cal]||'#eee'};color:${calC[e.cal]||'#666'};flex-shrink:0;">${e.cal}</div>
+      </div>`).join('')}
+  </div>
+
+  <!-- TABLA COMPLETA -->
+  <div style="background:white;border-radius:14px;border:1px solid #e0d0a8;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);overflow-x:auto;">
+    <div style="font-size:13px;font-weight:700;color:#7a6540;text-transform:uppercase;letter-spacing:1px;margin-bottom:14px;">Todos los estudiantes</div>
+    <table style="width:100%;border-collapse:collapse;font-family:Arial;font-size:13px;min-width:500px;">
+      <thead>
+        <tr style="background:#f5edd8;">
+          <th style="text-align:left;padding:8px 10px;font-size:11px;color:#7a6540;font-weight:700;border-bottom:2px solid #e0d0a8;">#</th>
+          <th style="text-align:left;padding:8px 10px;font-size:11px;color:#7a6540;font-weight:700;border-bottom:2px solid #e0d0a8;">Estudiante</th>
+          <th style="text-align:left;padding:8px 10px;font-size:11px;color:#7a6540;font-weight:700;border-bottom:2px solid #e0d0a8;">Grupo</th>
+          <th style="text-align:center;padding:8px 10px;font-size:11px;color:#7a6540;font-weight:700;border-bottom:2px solid #e0d0a8;">Nota</th>
+          <th style="text-align:center;padding:8px 10px;font-size:11px;color:#7a6540;font-weight:700;border-bottom:2px solid #e0d0a8;">Calificación</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${[...Object.entries(DATA)].flatMap(([inst,lista])=>
+          lista.map(e=>({...e,inst}))
+        ).sort((a,b)=>(b.p||0)-(a.p||0)).map((e,i)=>`
+          <tr style="${i%2===0?'background:#fdfaf3':'background:white'}">
+            <td style="padding:8px 10px;color:#aaa;font-size:12px;">${i+1}</td>
+            <td style="padding:8px 10px;font-weight:600;color:#1a1409;">${e.n}</td>
+            <td style="padding:8px 10px;color:#7a6540;font-size:12px;">${e.inst}</td>
+            <td style="padding:8px 10px;text-align:center;font-weight:900;font-size:16px;color:#c9a84c;">${e.p !== null ? e.p : '—'}</td>
+            <td style="padding:8px 10px;text-align:center;">
+              <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:${calB[e.cal]||'#eee'};color:${calC[e.cal]||'#666'};">${e.cal}</span>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+
+  container.innerHTML = html;
+}
+
+function descargarPDF() {
+  const inst = document.getElementById('selectInstructor').value;
+  if (!inst) { alert('Seleccioná un instructor primero'); return; }
+  const lista = DATA[inst] || [];
+  if (!lista.length) { alert('No hay datos para este instructor'); return; }
+
+  // Construir HTML limpio para PDF (fondo blanco, colores sólidos)
+  const fecha = new Date().toLocaleDateString('es-AR', {day:'2-digit',month:'long',year:'numeric'});
+
+  function starsText(n) {
+    if (n === null || n === undefined) return 'Sin responder';
+    return '★'.repeat(n) + '☆'.repeat(5-n);
+  }
+
+  function calColor(c) {
+    return {Excelente:'#1a7a40',Bueno:'#1a5276',Regular:'#7d6608',Malo:'#922b21',Incompleto:'#666'}[c]||'#333';
+  }
+  function calBg(c) {
+    return {Excelente:'#d5f5e3',Bueno:'#d6eaf8',Regular:'#fef9e7',Malo:'#fadbd8',Incompleto:'#eee'}[c]||'#eee';
+  }
+
+  let pagesHtml = '';
+
+  // Portada
+  pagesHtml += `
+  <div style="page-break-after:always; font-family:Arial,sans-serif; padding:60px 40px; text-align:center; background:#fff;">
+    <div style="font-size:28px;font-weight:900;color:#1a1409;">✦ Escuela de Evangelismo</div>
+    <div style="font-size:15px;color:#555;margin-top:8px;">Evaluación de Presentaciones Evangelísticas</div>
+    <div style="margin-top:24px;font-size:20px;color:#c9a84c;font-weight:700;">Instructor: ${inst}</div>
+    <div style="font-size:13px;color:#999;margin-top:6px;">${fecha}</div>
+    <div style="margin-top:40px;border-top:2px solid #c9a84c;width:60%;margin-left:auto;margin-right:auto;"></div>
+    <div style="margin-top:30px;font-size:14px;color:#444;">
+      Total de estudiantes: <strong>${lista.length}</strong>
+    </div>
+  </div>`;
+
+  // Una tarjeta por página
+  lista.forEach((e, idx) => {
+    const isLast = idx === lista.length - 1;
+    const pageBreak = isLast ? '' : 'page-break-after:always;';
+
+    const rows = [
+      [LABELS.q1, starsText(e.q1), LABELS.q2, starsText(e.q2)],
+      [LABELS.q3, starsText(e.q3), LABELS.q5, starsText(e.q5)],
+      [LABELS.q6, starsText(e.q6), LABELS.q7, starsText(e.q7)],
+      [LABELS.q9, starsText(e.q9), LABELS.q11, starsText(e.q11)],
+    ];
+
+    const tiempoVal = e.q10 === true ? '✔ Cumplió el tiempo' : e.q10 === false ? '✘ No cumplió' : 'Sin responder';
+
+    pagesHtml += `
+    <div style="${pageBreak} font-family:Arial,sans-serif; padding:28px 36px; background:#fff; min-height:100%;">
+
+      <!-- Cabecera mini -->
+      <div style="font-size:10px;color:#aaa;text-align:right;margin-bottom:12px;">Escuela de Evangelismo · ${inst} · ${fecha}</div>
+
+      <!-- Nombre y nota -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #c9a84c;padding-bottom:14px;margin-bottom:18px;">
+        <div>
+          <div style="font-size:22px;font-weight:900;color:#1a1409;">${e.n}</div>
+          <div style="font-size:12px;color:#777;margin-top:4px;">📖 ${e.h}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:48px;font-weight:900;color:#c9a84c;line-height:1;">${e.p !== null ? e.p : '—'}</div>
+          <div style="display:inline-block;margin-top:4px;font-size:13px;font-weight:700;padding:4px 14px;border-radius:20px;background:${calBg(e.cal)};color:${calColor(e.cal)};">${e.cal}</div>
+        </div>
+      </div>
+
+      <!-- Grilla de preguntas -->
+      <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+        ${rows.map(r=>`
+        <tr>
+          <td style="width:25%;padding:9px 10px;border:1px solid #ddd;vertical-align:top;">
+            <div style="font-size:9px;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:3px;">${r[0]}</div>
+            <div style="font-size:16px;color:#c9a84c;letter-spacing:2px;">${r[1]}</div>
+          </td>
+          <td style="width:25%;padding:9px 10px;border:1px solid #ddd;vertical-align:top;">
+            <div style="font-size:9px;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:3px;">${r[2]}</div>
+            <div style="font-size:16px;color:#c9a84c;letter-spacing:2px;">${r[3]}</div>
+          </td>
+        </tr>`).join('')}
+        <tr>
+          <td colspan="2" style="padding:9px 10px;border:1px solid #ddd;vertical-align:top;">
+            <div style="font-size:9px;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:3px;">${LABELS.q10}</div>
+            <div style="font-size:13px;font-weight:700;color:${e.q10===true?'#27ae60':e.q10===false?'#c0392b':'#aaa'};">${tiempoVal}</div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Términos y comentario -->
+      <table style="width:100%;border-collapse:collapse;">
+        <tr>
+          <td style="width:40%;padding:9px 10px;border:1px solid #ddd;vertical-align:top;">
+            <div style="font-size:9px;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:3px;">Términos eclesiásticos</div>
+            <div style="font-size:13px;color:#333;">${e.q8||'—'}</div>
+          </td>
+          <td style="padding:9px 10px;border:1px solid #ddd;vertical-align:top;">
+            <div style="font-size:9px;text-transform:uppercase;color:#999;font-weight:700;margin-bottom:3px;">Comentario</div>
+            <div style="font-size:13px;color:#333;font-style:italic;">${e.com||'—'}</div>
+          </td>
+        </tr>
+      </table>
+    </div>`;
+  });
+
+  // Abrir ventana de impresión
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Evaluaciones ${inst}</title>
+    <style>
+      @page { margin: 15mm; size: A4; }
+      body { margin:0; padding:0; background:#fff; }
+      @media print {
+        .no-print { display:none; }
+        div[style*="page-break-after"] { page-break-after: always; }
+      }
+    </style>
+  </head><body>
+    <div class="no-print" style="position:fixed;top:0;left:0;right:0;background:#1a1409;color:#c9a84c;text-align:center;padding:10px;font-family:Arial;font-size:14px;font-weight:700;z-index:999;">
+      Presioná Ctrl+P (o ⌘+P) para imprimir / guardar como PDF &nbsp;|&nbsp; 
+      <button onclick="window.print()" style="background:#c9a84c;color:#1a1409;border:none;padding:6px 16px;border-radius:6px;font-weight:700;cursor:pointer;font-size:13px;">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+    <div style="padding-top:45px;">
+      ${pagesHtml}
+    </div>
+  </body></html>`);
+  w.document.close();
+}
+</script>
+</body>
+</html>
